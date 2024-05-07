@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "summit-2024-keynote"
+version = "0.1.0"
+description = ""
+authors = ["emarco <emarco@google.com>"]
+readme = "README.md"
+packages = [{include = "summit_2024_keynote"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+langchain = "^0.1.17"
+langgraph = "^0.0.40"
+langchain-google-vertexai = "^1.0.3"
+python-dotenv = "^1.0.1"
+isort = "^5.13.2"
+black = "^24.4.2"
+pytest = "^8.2.0"
+flask = "^3.0.3"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
