@@ -5,6 +5,7 @@ from flask import Flask, render_template, request, jsonify
 from agent.main import compiled_graph
 
 load_dotenv()
+
 app = Flask(__name__)
 
 
@@ -32,4 +33,4 @@ def get_bags():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", debug=False, port=8080)
