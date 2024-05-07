@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Bag App</title>
+</head>
+<body>
+    <h1>Welcome to the Bag App</h1>
+
+    <input type="text" id="searchInput" placeholder="Search for bags...">
+    <button onclick="searchBags()">Search</button>
+
+    <div id="bagResults"></div>
+
+    <script>
+        function searchBags() {
+            let query = document.getElementById('searchInput').value;
+            fetch('/bags?query=' + query)
+                .then(response => response.json())
+                .then(bags => {
+                    // Display bags in the 'bagResults' div (customize the display)
+                    // ...
+                });
+        }
+    </script>
+</body>
+</html>

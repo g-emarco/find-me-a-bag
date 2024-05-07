@@ -1,0 +1,20 @@
+[
+    {
+        "id": 1,
+        "bucket_uri": "https://storage.googleapis.com/public_bags/beige%20classic%202.png",
+        "name": "Beige Classic",
+        "description": "A stylish brown leather tote bag with ample space."
+    },
+    {
+        "id": 2,
+        "bucket_uri": "https://storage.googleapis.com/public_bags/black%20channel-like%201.png",
+        "name": "Black Channel Bag",
+        "description": "A durable canvas backpack for everyday use."
+    },
+    {
+        "id": 3,
+        "bucket_uri": "https://storage.googleapis.com/public_bags/burberry%203.png",
+        "name": "Burberry Bag",
+        "description": "A small, elegant clutch for special occasions."
+    }
+]

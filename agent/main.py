@@ -4,8 +4,8 @@ from langchain_core.prompts import PromptTemplate
 from langchain_google_vertexai import VertexAI
 from langgraph.graph import END, StateGraph
 
-from nodes import Searches, hybrid_search, keyword_search, semantic_search
-from state import AgentState
+from agent.nodes import Searches, hybrid_search, keyword_search, semantic_search
+from agent.state import AgentState
 
 load_dotenv()
 
@@ -52,12 +52,12 @@ def router(state: AgentState) -> str:
     raise ValueError(f"Could not determine next node for {input=}")
 
 
-def foo(state):
+def start_dummy(state):
     return {}
 
 
 flow = StateGraph(AgentState)
-flow.add_node("classify_query", foo)
+flow.add_node("classify_query", start_dummy)
 flow.set_entry_point("classify_query")
 flow.add_conditional_edges("classify_query", router)
 flow.add_node(Searches.SEMANTIC_SEARCH.value, semantic_search)  # type: ignore
@@ -68,10 +68,10 @@ flow.add_edge(Searches.HYBRID_SEARCH.value, END)  # type: ignore
 flow.add_edge(Searches.SEMANTIC_SEARCH.value, END)  # type: ignore
 
 
-app = flow.compile()
-app.get_graph().draw_mermaid_png(output_file_path="graph.png")
+compiled_graph = flow.compile()
+# compiled_graph.get_graph().draw_mermaid_png(output_file_path="graph.png")
 
 if __name__ == "__main__":
-    app.invoke({"query": "find me a bag similar to this bag"})
-    app.invoke({"query": "find me a a black bag"})
-    app.invoke({"query": "find me a a black bag similar to my bag"})
+    compiled_graph.invoke({"query": "find me a bag similar to this bag"})
+    compiled_graph.invoke({"query": "find me a a black bag"})
+    compiled_graph.invoke({"query": "find me a a black bag similar to my bag"})
