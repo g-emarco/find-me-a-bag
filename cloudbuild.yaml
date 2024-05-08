@@ -1,0 +1,9 @@
+steps:
+- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+  entrypoint: gcloud
+  id: Deploy API
+  args: ['run', 'deploy', 'service-bags',
+             '--source=.',
+             '--region=us-east1',
+              '--allow-unauthenticated',
+              '--min-instances=1']
