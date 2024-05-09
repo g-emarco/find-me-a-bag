@@ -50,7 +50,6 @@ def semantic_search(state: AgentState) -> Dict[str, Any]:
 
     from google.cloud import aiplatform_v1
 
-    # Set variables for the current deployed index.
     API_ENDPOINT = "1545454881.me-west1-984298407984.vdb.vertexai.goog"
     INDEX_ENDPOINT = (
         "projects/984298407984/locations/me-west1/indexEndpoints/6212715685957599232"
@@ -62,7 +61,6 @@ def semantic_search(state: AgentState) -> Dict[str, Any]:
         client_options=client_options,
     )
 
-    # Build FindNeighborsRequest object
     datapoint = aiplatform_v1.IndexDatapoint(feature_vector=embedding)
     query = aiplatform_v1.FindNeighborsRequest.Query(
         datapoint=datapoint, neighbor_count=10
@@ -75,5 +73,9 @@ def semantic_search(state: AgentState) -> Dict[str, Any]:
     )
 
     response = vector_search_client.find_neighbors(request)
-
-    print(response)
+    ids = [
+        neighbor.datapoint.datapoint_id
+        for neighbor in response.nearest_neighbors[0].neighbors.pb
+    ]
+    print(f"neighbors are {ids=}")
+    return {"results": ids}

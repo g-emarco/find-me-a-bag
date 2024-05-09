@@ -4,6 +4,8 @@ import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials, firestore
 from flask import Flask, jsonify, render_template, request
+from google.cloud.firestore_v1 import FieldFilter
+from google.cloud.firestore_v1.field_path import FieldPath
 
 from agent.main import compiled_graph
 
@@ -28,7 +30,15 @@ def get_bags():
 
     if query:
         print("filtering bags...")
-        documents = get_bag_by_text_query(text_query=query)
+        graph_res = get_bag_by_text_query(text_query=query)
+        documents = (
+            db.collection("Bags")
+            # .where(FieldPath.document_id(), "in", graph_res["results"])
+            .where(filter=FieldFilter("id", "in", graph_res['results']))
+            .get()
+        )
+        documents = [d.to_dict() for d in documents]
+
     else:
         print("fetching all bags...")
 
@@ -41,7 +51,7 @@ def get_bags():
 
 def get_all_documents_from_firestore() -> List[Dict[str, str]]:
 
-    data = db.collection("bags").stream()
+    data = db.collection("Bags").stream()
     documents = [d.to_dict() for d in data]
 
     return documents
