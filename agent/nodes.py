@@ -1,12 +1,16 @@
+import json
+import subprocess
 from enum import Enum
 from typing import Any, Dict
 
-from langchain_google_vertexai import VertexAIEmbeddings
+from langchain_google_vertexai import VertexAIEmbeddings, VectorSearchVectorStore
 from agent.state import AgentState
+import requests
 
-HYBRID_SEARCH = "hybrid_search"
-KEYWORD_SEARCH = "keyword_search"
-SEMANTIC_SEARCH = "semantic_search"
+VECTORDB_PROJECT_ID = "<my_project_id>"
+VECTORDB_REGION = "me-west1"
+VECTORDB_BUCKET = "<my_gcs_bucket>"
+VECTORDB_BUCKET_URI = f"gs://{VECTORDB_BUCKET}"
 
 
 class Searches(Enum):
@@ -41,6 +45,35 @@ def keyword_search(state: AgentState) -> Dict[str, Any]:
 def semantic_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"]
     print(f"semantic_search enter, {query=}")
-    embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@001")
+    embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
     embedding = embeddings.embed_query(text=query)
-    return {}
+
+    from google.cloud import aiplatform_v1
+
+    # Set variables for the current deployed index.
+    API_ENDPOINT = "1545454881.me-west1-984298407984.vdb.vertexai.goog"
+    INDEX_ENDPOINT = (
+        "projects/984298407984/locations/me-west1/indexEndpoints/6212715685957599232"
+    )
+    DEPLOYED_INDEX_ID = "index_demo_summit_deployed"
+
+    client_options = {"api_endpoint": API_ENDPOINT}
+    vector_search_client = aiplatform_v1.MatchServiceClient(
+        client_options=client_options,
+    )
+
+    # Build FindNeighborsRequest object
+    datapoint = aiplatform_v1.IndexDatapoint(feature_vector=embedding)
+    query = aiplatform_v1.FindNeighborsRequest.Query(
+        datapoint=datapoint, neighbor_count=10
+    )
+    request = aiplatform_v1.FindNeighborsRequest(
+        index_endpoint=INDEX_ENDPOINT,
+        deployed_index_id=DEPLOYED_INDEX_ID,
+        queries=[query],
+        return_full_datapoint=False,
+    )
+
+    response = vector_search_client.find_neighbors(request)
+
+    print(response)

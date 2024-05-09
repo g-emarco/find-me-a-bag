@@ -17,6 +17,7 @@ def router(state: AgentState) -> str:
     You are a router, your task is make a decision between 3 possible action paths based on the human message:
 
     "SEMANTIC_SEARCH" Take this path if the query can be answered by running a semantic / similarity search query to the vectordb.
+                      For example: cute bag to go to the beach
     
     "HYBRID_SEARCH" Take this path if the query should be a result of a hybrid search for the vectordb, a keyword + semantic.
         

@@ -1,4 +1,3 @@
-import json
 from typing import List, Dict
 
 import firebase_admin
@@ -19,8 +18,8 @@ def index():
     return render_template("index.html")
 
 
-def get_bag_by_query(query: str):
-    return compiled_graph.invoke({"query": query})
+def get_bag_by_text_query(text_query: str):
+    return compiled_graph.invoke({"query": text_query})
 
 
 @app.route("/bags")
@@ -29,7 +28,7 @@ def get_bags():
 
     if query:
         print("filtering bags...")
-        documents = get_bag_by_query(query=query)
+        documents = get_bag_by_text_query(text_query=query)
     else:
         print("fetching all bags...")
 
