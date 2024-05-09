@@ -1,10 +1,15 @@
-from dotenv import load_dotenv
 import json
-from flask import Flask, render_template, request, jsonify
+from typing import List, Dict
+
+import firebase_admin
+from dotenv import load_dotenv
+from firebase_admin import credentials, firestore
+from flask import Flask, jsonify, render_template, request
 
 from agent.main import compiled_graph
 
 load_dotenv()
+
 
 app = Flask(__name__)
 
@@ -14,23 +19,37 @@ def index():
     return render_template("index.html")
 
 
+def get_bag_by_query(query: str):
+    return compiled_graph.invoke({"query": query})
+
+
 @app.route("/bags")
 def get_bags():
     query = request.args.get("query")
 
     if query:
         print("filtering bags...")
-
-        bag_data = compiled_graph.invoke({"query": query})
+        documents = get_bag_by_query(query=query)
     else:
         print("fetching all bags...")
-        with open("bags.json", "r") as f:
-            bag_data = json.load(f)
 
-    filtered_bags = bag_data
+        documents = get_all_documents_from_firestore()
+
+    filtered_bags = documents
 
     return jsonify(filtered_bags)
 
 
+def get_all_documents_from_firestore() -> List[Dict[str, str]]:
+
+    data = db.collection("bags").stream()
+    documents = [d.to_dict() for d in data]
+
+    return documents
+
+
 if __name__ == "__main__":
+    cred = credentials.ApplicationDefault()
+    firebase_admin.initialize_app(cred)
+    db = firestore.client()
     app.run(host="0.0.0.0", debug=False, port=8080)

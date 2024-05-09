@@ -1,3 +1,7 @@
+from dotenv import load_dotenv
+
+load_dotenv()
+
 from agent.main import router
 from agent.nodes import Searches
 from agent.state import AgentState
@@ -11,7 +15,7 @@ def test_router_semantic() -> None:
 
 
 def test_router_keyword() -> None:
-    query = "find me a a black bag"
+    query = "black bag"
     state: AgentState = AgentState(query=query)
     res = router(state)
     assert res == Searches.KEYWORD_SEARCH.value

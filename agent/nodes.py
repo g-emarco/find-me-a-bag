@@ -1,6 +1,7 @@
 from enum import Enum
 from typing import Any, Dict
 
+from langchain_google_vertexai import VertexAIEmbeddings
 from agent.state import AgentState
 
 HYBRID_SEARCH = "hybrid_search"
@@ -22,6 +23,8 @@ def hybrid_search(state: AgentState) -> Dict[str, Any]:
 
 def keyword_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"]
+
+    sparse_embedding = ""
     print(f"keyword_search enter, {query=}")
     return {
         "results": [
@@ -38,5 +41,6 @@ def keyword_search(state: AgentState) -> Dict[str, Any]:
 def semantic_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"]
     print(f"semantic_search enter, {query=}")
-
+    embeddings = VertexAIEmbeddings(model_name="textembedding-gecko-multilingual@001")
+    embedding = embeddings.embed_query(text=query)
     return {}

@@ -16,6 +16,7 @@ isort = "^5.13.2"
 black = "^24.4.2"
 pytest = "^8.2.0"
 flask = "^3.0.3"
+firebase-admin = "^6.5.0"
 
 
 [build-system]

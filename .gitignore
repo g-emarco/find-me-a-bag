@@ -1,4 +1,2 @@
 /langgraph-agent-sa.json
-*.env
-
-# gcloud run deploy service-bags --source . --allow-unauthenticated --region -us-east1 --min-instance 1
+.env

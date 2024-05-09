@@ -1,5 +1,5 @@
 import operator
-from typing import TypedDict, Annotated, Any, Dict
+from typing import Annotated, Any, Dict, TypedDict
 
 
 class AgentState(TypedDict):

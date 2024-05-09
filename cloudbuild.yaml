@@ -4,6 +4,7 @@ steps:
   id: Deploy API
   args: ['run', 'deploy', 'service-bags',
              '--source=.',
+             '--service-account=langgraph-agent-sa@langgraph-422507.iam.gserviceaccount.com',
              '--region=us-east1',
               '--allow-unauthenticated',
               '--min-instances=1']
