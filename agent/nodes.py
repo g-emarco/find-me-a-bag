@@ -44,9 +44,15 @@ def keyword_search(state: AgentState) -> Dict[str, Any]:
 
 def semantic_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"]
-    print(f"semantic_search enter, {query=}")
+    print(f"semantic_search enter, {query[:50]=}")
     embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
-    embedding = embeddings.embed_query(text=query)
+
+    print(f"************{state=}******")
+    if image_file_path := state.get("image_file_path"):
+        print(f"embedding {image_file_path=}")
+        embedding = embeddings.embed_image(image_path=image_file_path)
+    else:
+        embedding = embeddings.embed_query(text=query)
 
     from google.cloud import aiplatform_v1
 

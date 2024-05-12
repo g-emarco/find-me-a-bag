@@ -18,6 +18,7 @@ def router(state: AgentState) -> str:
 
     "SEMANTIC_SEARCH" Take this path if the query can be answered by running a semantic / similarity search query to the vectordb.
                       For example: cute bag to go to the beach
+                      For example: an image file path
     
     "HYBRID_SEARCH" Take this path if the query should be a result of a hybrid search for the vectordb, a keyword + semantic.
         
