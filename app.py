@@ -29,21 +29,32 @@ def get_bag_by_image(image_file_path: str):
     return compiled_graph.invoke({"query": "", "image_file_path": image_file_path})
 
 
+def get_bag_by_image_and_text_query(text_query:str,image_file_path:str):
+    return compiled_graph.invoke({"query": text_query, "image_file_path": image_file_path})
+
+
 @app.route("/bags", methods=["POST", "GET"])
 def get_bags():
     if request.method == "POST":
+
         if not request.json or "image" not in request.json:
             abort(400)
 
-        im_b64 = request.json["image"]
+        query = request.json.get("query")
+        im_b64 = request.json.get("image")
 
-        img_bytes = base64.b64decode(im_b64.encode("utf-8"))
-        print(f"{img_bytes[:50]=}")
+        if im_b64:
+            img_bytes = base64.b64decode(im_b64.encode("utf-8"))
+            print(f"{img_bytes[:50]=}")
 
-        with open("tmp_image.jpeg", "wb") as file:
-            file.write(img_bytes)
+            with open("tmp_image.jpeg", "wb") as file:
+                file.write(img_bytes)
 
-        graph_res = get_bag_by_image(image_file_path="tmp_image.jpeg")
+        if query and im_b64:
+            graph_res = get_bag_by_image_and_text_query(text_query=query,image_file_path="tmp_image.jpeg")
+        if im_b64:
+            graph_res = get_bag_by_image(image_file_path="tmp_image.jpeg")
+
         documents = (
             db.collection("Bags")
             .where(filter=FieldFilter("id", "in", graph_res["results"]))
