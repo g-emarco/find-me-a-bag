@@ -19,10 +19,11 @@ def router(state: AgentState) -> str:
     "SEMANTIC_SEARCH" Take this path if the query can be answered by running a semantic / similarity search query to the vectordb.
                       For example: cute bag to go to the beach
                       For example: an image file path
-    
-    "HYBRID_SEARCH" Take this path if the query should be a result of a hybrid search for the vectordb, a keyword + semantic.
+                      
+    "HYBRID_SEARCH" Take this path if the query should be a result of a combined search query to the vectordb, based both on similarity and keywords.
+    For example, you have in state['image'] an encoding of an image and in state['query'] you have a query like: 'Cymbal Bag'"
         
-    "KEYWORD_SEARCH" Take this path if the query requires a simple keyword search, for example "a blue bag" can be translated into a keyword search.
+    "KEYWORD_SEARCH" Take this path if you have only the query requires a simple keyword search, for example "a blue bag" can be translated into a keyword search.
     
     Rule 1 : You should never infer information if it does not appear in the context of the query
     Rule 2 : You can only answer with the type of query that you choose based on why you choose it.

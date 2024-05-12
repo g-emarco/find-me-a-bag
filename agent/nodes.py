@@ -1,18 +1,22 @@
 import json
+import os
 import subprocess
 from enum import Enum
 from typing import Any, Dict
 
-from langchain_google_vertexai import VertexAIEmbeddings, VectorSearchVectorStore
+from langchain_google_vertexai import VertexAIEmbeddings
+
 from agent.state import AgentState
 import requests
+
+from corpus import bm25
 
 VECTORDB_PROJECT_ID = "<my_project_id>"
 VECTORDB_REGION = "me-west1"
 VECTORDB_BUCKET = "<my_gcs_bucket>"
 VECTORDB_BUCKET_URI = f"gs://{VECTORDB_BUCKET}"
 
-
+MAX_RES =10
 class Searches(Enum):
     HYBRID_SEARCH = "HYBRID_SEARCH"
     KEYWORD_SEARCH = "KEYWORD_SEARCH"
@@ -20,26 +24,77 @@ class Searches(Enum):
 
 
 def hybrid_search(state: AgentState) -> Dict[str, Any]:
-    query = state["query"]
+    query = state["query"].strip("'")
     print(f"hybrid_search enter, {query=}")
-    return {"result": "aaa"}
+
+    return matching_engine_search(query=query, hybrid=True)
 
 
 def keyword_search(state: AgentState) -> Dict[str, Any]:
-    query = state["query"]
+    query = state["query"].strip("'")
 
-    sparse_embedding = ""
-    print(f"keyword_search enter, {query=}")
-    return {
-        "results": [
+    return matching_engine_search(query=query)
+
+
+def matching_engine_search(query: str, hybrid: bool = False) -> Dict[str, Any]:
+    print(f"matching_engine_search enter, {query=}, {hybrid=}")
+
+    sparse_vector = bm25.encode_documents(query)
+    embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
+    dense_embedding = embeddings.embed_query(text=query)
+
+    text_query_sparse_embedding_modified = (
+        str(sparse_vector).replace("'", '"').replace("indices", "dimensions")
+    )
+    print("###################################")
+
+    url = "https://1545454881.me-west1-984298407984.vdb.vertexai.goog/v1/projects/984298407984/locations/me-west1/indexEndpoints/6212715685957599232:findNeighbors"
+
+    if os.environ.get("LOCAL"):
+        access_token_command = "gcloud auth print-access-token"
+        access_token_result = subprocess.run(
+            access_token_command, shell=True, capture_output=True, text=True
+        )
+        access_token = access_token_result.stdout.strip()
+    else:
+        import google.auth
+        import google.auth.transport.requests
+
+        creds, project = google.auth.default()
+
+        auth_req = google.auth.transport.requests.Request()
+        creds.refresh(auth_req)
+        access_token = creds.token
+
+    data = {
+        "deployedIndexId": "index_demo_summit_deployed",
+        "queries": [
             {
-                "id": 2,
-                "bucket_uri": "https://storage.googleapis.com/public_bags/black%20channel-like%201.png",
-                "name": "Black Channel Bag",
-                "description": "A durable canvas backpack for everyday use. Fun and beautiful at the same time",
+                "datapoint": {
+                    "sparseEmbedding": json.loads(text_query_sparse_embedding_modified),
+                    "featureVector": "" if hybrid else None,
+                },
+                "neighborCount": 5,
+                "rrf": {"alpha": 0.501 if hybrid else 0},
             }
-        ]
+        ],
+        "returnFullDatapoint": False,
     }
+
+    response = requests.post(
+        url, headers={"Authorization": f"Bearer {access_token}"}, json=data
+    )
+    response_content = json.loads(response.content)
+    print(response.status_code)
+    print(response_content)
+
+    ids = [
+        neighbor["datapoint"]["datapointId"]
+        for neighbor in response_content["nearestNeighbors"][0]["neighbors"]
+    ]
+
+    print(f"{ids=}")
+    return {"results": ids[:MAX_RES]}
 
 
 def semantic_search(state: AgentState) -> Dict[str, Any]:
@@ -85,4 +140,4 @@ def semantic_search(state: AgentState) -> Dict[str, Any]:
         for neighbor in response.nearest_neighbors[0].neighbors.pb
     ]
     print(f"neighbors are {ids=}")
-    return {"results": ids}
+    return {"results": ids[:MAX_RES]}
