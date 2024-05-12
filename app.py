@@ -43,6 +43,9 @@ def get_bags():
         query = request.json.get("query")
         im_b64 = request.json.get("image")
 
+        print(f"***********************************")
+        print(f"{query=} \n {im_b64[:50]=}")
+
         if im_b64:
             img_bytes = base64.b64decode(im_b64.encode("utf-8"))
             print(f"{img_bytes[:50]=}")
