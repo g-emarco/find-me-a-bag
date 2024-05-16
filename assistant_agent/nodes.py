@@ -1,22 +1,18 @@
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from dotenv import load_dotenv
-from google.cloud import firestore_v1
-from google.cloud.firestore_v1 import FieldFilter
-from google.cloud.firestore_v1.field_path import FieldPath
-from langchain_core.messages import HumanMessage
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.tools import tool
 from langchain_google_vertexai import ChatVertexAI, VertexAI
 
+from assistant_agent._html_for_mail import _populate_bag_email
 from assistant_agent.state import AssistantAgentState
 from db_setup import db
 
 load_dotenv()
 import os
 
-from langgraph.prebuilt import ToolNode
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
@@ -57,17 +53,19 @@ html_content = """
 
 
 @tool
-def send_email() -> None:
+def send_email(bag_data: Optional[Dict[str, Any]]) -> None:
     """
     "This function sends an email letting the recipient know that someone is looking for a bag to buy them
     :return: None
     """
-    print("@@@@@@@@@@@@@@@@@@@@@@@@")
+    print("@@@@@@@@@@")
+    print(bag_data)
+    html_content2 = _populate_bag_email(bag_data=bag_data)
     message = Mail(
         from_email="e75686682@gmail.com",
         to_emails="emarco@google.com",
         subject="Cool bag to buy",
-        html_content=html_content,
+        html_content=html_content2,
     )
 
     sg = SendGridAPIClient(os.environ.get("SENDGRID_API_KEY"))
@@ -93,10 +91,9 @@ def get_user_information(user_id: str = "emKszv8xjISy446FJNmK") -> Dict[str, Any
 def get_information_about_bag(bag_name: str):
     """
 
-    :param bag_id: the name of the bag to search
+    :param bag_name: the name of the bag to search
     :return: all the information relevant for a bag
     """
-    # document = db.collection("Bags").document(bag_id).get()
     document = db.collection("Bags").where("name", "==", bag_name).get()[0]
     return {"bag_data": document.to_dict()}
 

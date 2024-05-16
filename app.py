@@ -118,7 +118,6 @@ def assistant():
         {
             "messages": [HumanMessage(content=query)],
             "user_id": "emKszv8xjISy446FJNmK",
-            "bag_id": 1,
             "query": query,
         }
     )
@@ -127,18 +126,16 @@ def assistant():
 
     print("**********")
     print(res)
-    return {
-        # add time of message
-        "messages": [
-            {
-                "role": (type(message).__name__),
-                "content": message.content,
-                "time": datetime.datetime.now().strftime("%H:%M"),
-            }
-            for message in chat_history.messages
-            if message.content and type(message).__name__ != "ToolMessage"
-        ]
-    }
+    history = [
+        {
+            "role": (type(message).__name__),
+            "content": message.content,
+            "time": datetime.datetime.now().strftime("%H:%M"),
+        }
+        for message in chat_history.messages
+        if message.content and type(message).__name__ != "ToolMessage"
+    ]
+    return {"messages": [history[-1]]}
 
 
 if __name__ == "__main__":
