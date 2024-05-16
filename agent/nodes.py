@@ -4,11 +4,10 @@ import subprocess
 from enum import Enum
 from typing import Any, Dict
 
+import requests
 from langchain_google_vertexai import VertexAIEmbeddings
 
 from agent.state import AgentState
-import requests
-
 from corpus import bm25
 
 VECTORDB_PROJECT_ID = "<my_project_id>"
@@ -16,7 +15,9 @@ VECTORDB_REGION = "me-west1"
 VECTORDB_BUCKET = "<my_gcs_bucket>"
 VECTORDB_BUCKET_URI = f"gs://{VECTORDB_BUCKET}"
 
-MAX_RES =10
+MAX_RES = 10
+
+
 class Searches(Enum):
     HYBRID_SEARCH = "HYBRID_SEARCH"
     KEYWORD_SEARCH = "KEYWORD_SEARCH"
@@ -72,14 +73,20 @@ def matching_engine_search(query: str, hybrid: bool = False) -> Dict[str, Any]:
             {
                 "datapoint": {
                     "sparseEmbedding": json.loads(text_query_sparse_embedding_modified),
-                    "featureVector": "" if hybrid else None,
+                    "featureVector": dense_embedding,
                 },
-                "neighborCount": 5,
+                "neighborCount": 10,
                 "rrf": {"alpha": 0.501 if hybrid else 0},
             }
         ],
         "returnFullDatapoint": False,
     }
+
+    if not hybrid:
+        data['queries'][0]['datapoint'].pop("featureVector")
+    if hybrid:
+        data['queries'][0]['neighborCount'] = 2
+
 
     response = requests.post(
         url, headers={"Authorization": f"Bearer {access_token}"}, json=data

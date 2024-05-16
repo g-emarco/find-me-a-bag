@@ -1,14 +1,18 @@
 import base64
-from typing import List, Dict
+import json
+from typing import Dict, List
 
 import firebase_admin
 from dotenv import load_dotenv
 from firebase_admin import credentials, firestore
-from flask import Flask, jsonify, render_template, request, abort
+from flask import Flask, abort, jsonify, render_template, request
 from google.cloud.firestore_v1 import FieldFilter
 from google.cloud.firestore_v1.field_path import FieldPath
+from langchain_core.messages import BaseMessage, HumanMessage
 
 from agent.main import compiled_graph
+from assistant_agent.graph import graph
+from db_setup import db
 
 load_dotenv()
 
@@ -102,8 +106,43 @@ def get_all_documents_from_firestore() -> List[Dict[str, str]]:
     return documents
 
 
+history_tmp1 = {
+    "messages": [
+        ["human", "List me me my account details"],
+        ["ai", "I can help with that!\n\nFirst, can I confirm your email address? \n"],
+        ["human", "yes"],
+        ["ai", "What is your email address? \n"],
+    ],
+    "bag_id": 1,
+    "user_id": "emKszv8xjISy446FJNmK",
+}
+
+history_tmp2 = {
+    "messages": [
+        ["human", "Hi"],
+        ["ai", "Hello! How can I help you today? 😊 \n"],
+    ],
+    "bag_id": 1,
+    "user_id": "emKszv8xjISy446FJNmK",
+}
+
+
+@app.route("/assistant", methods=["GET"])
+def assistant():
+    query = request.args.get("query")
+
+    history_tmp2["messages"].append(HumanMessage(content=query))
+    res = graph.invoke(history_tmp2)
+    print("**********")
+    print(res)
+    return {
+        "messages": [
+            {"role": (type(message).__name__), "content": message.content}
+            for message in res["messages"]
+            if message.content and type(message).__name__ != "ToolMessage"
+        ]
+    }
+
+
 if __name__ == "__main__":
-    cred = credentials.ApplicationDefault()
-    firebase_admin.initialize_app(cred)
-    db = firestore.client()
     app.run(host="0.0.0.0", debug=False, port=8080)

@@ -1,7 +1,7 @@
 import google
+import google.auth.transport.requests
 import google.oauth2.credentials
 from google.auth import compute_engine
-import google.auth.transport.requests
 
 
 def idtoken_from_metadata_server(url: str) -> str:

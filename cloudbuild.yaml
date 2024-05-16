@@ -7,4 +7,5 @@ steps:
              '--service-account=langgraph-agent-sa@langgraph-422507.iam.gserviceaccount.com',
              '--region=me-west1',
               '--allow-unauthenticated',
+              '--set-secrets=SENDGRID_API_KEY=SENDGRID_API_KEY:latest',
               '--min-instances=1']
