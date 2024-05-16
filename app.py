@@ -1,4 +1,5 @@
 import base64
+import datetime
 import json
 from typing import Dict, List
 
@@ -127,8 +128,13 @@ def assistant():
     print("**********")
     print(res)
     return {
+        # add time of message
         "messages": [
-            {"role": (type(message).__name__), "content": message.content}
+            {
+                "role": (type(message).__name__),
+                "content": message.content,
+                "time": datetime.datetime.now().strftime("%H:%M"),
+            }
             for message in chat_history.messages
             if message.content and type(message).__name__ != "ToolMessage"
         ]
