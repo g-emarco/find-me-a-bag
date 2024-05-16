@@ -83,10 +83,9 @@ def matching_engine_search(query: str, hybrid: bool = False) -> Dict[str, Any]:
     }
 
     if not hybrid:
-        data['queries'][0]['datapoint'].pop("featureVector")
+        data["queries"][0]["datapoint"].pop("featureVector")
     if hybrid:
-        data['queries'][0]['neighborCount'] = 2
-
+        data["queries"][0]["neighborCount"] = 2
 
     response = requests.post(
         url, headers={"Authorization": f"Bearer {access_token}"}, json=data

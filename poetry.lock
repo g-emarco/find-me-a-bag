@@ -1394,6 +1394,25 @@ tenacity = ">=8.1.0,<9.0.0"
 extended-testing = ["jinja2 (>=3,<4)"]
 
 [[package]]
+name = "langchain-google-firestore"
+version = "0.2.1"
+description = "LangChain integrations for Google Cloud Firestore"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "langchain_google_firestore-0.2.1-py3-none-any.whl", hash = "sha256:3ae54f21ef7e31f87749dcbc7e52d2eef0aa6d8d7ac803e5e7a5ac6343bc4fed"},
+]
+
+[package.dependencies]
+google-cloud-firestore = ">=2.16.0,<3.0.0"
+langchain-community = ">=0.0.18,<1.0.0"
+langchain-core = ">=0.1.1,<1.0.0"
+more-itertools = ">=10.2.0,<11.0.0"
+
+[package.extras]
+test = ["black[jupyter] (==23.12.1)", "isort (==5.13.2)", "mypy (==1.10.0)", "pytest (==7.4.4)", "pytest-asyncio (==0.23.6)"]
+
+[[package]]
 name = "langchain-google-vertexai"
 version = "1.0.3"
 description = "An integration package connecting Google VertexAI and LangChain"
@@ -1640,6 +1659,17 @@ files = [
 
 [package.extras]
 test = ["mypy (>=1.0)", "pytest (>=7.0.0)"]
+
+[[package]]
+name = "more-itertools"
+version = "10.2.0"
+description = "More routines for operating on iterables, beyond itertools"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "more-itertools-10.2.0.tar.gz", hash = "sha256:8fccb480c43d3e99a00087634c06dd02b0d50fbf088b380de5a41a015ec239e1"},
+    {file = "more_itertools-10.2.0-py3-none-any.whl", hash = "sha256:686b06abe565edfab151cb8fd385a05651e1fdf8f0a14191e4439283421f8684"},
+]
 
 [[package]]
 name = "msgpack"
@@ -2922,4 +2952,4 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "9ce1b1014e77f83c0a5c88c3767077d19be46b92714ea33bce329ef3331178b2"
+content-hash = "a02de66f6bb2b094b06920accb8ecaf10b86becf4b1648435cdc2d06d1740673"

@@ -9,6 +9,7 @@ from flask import Flask, abort, jsonify, render_template, request
 from google.cloud.firestore_v1 import FieldFilter
 from google.cloud.firestore_v1.field_path import FieldPath
 from langchain_core.messages import BaseMessage, HumanMessage
+from langchain_google_firestore import FirestoreChatMessageHistory
 
 from agent.main import compiled_graph
 from assistant_agent.graph import graph
@@ -106,39 +107,29 @@ def get_all_documents_from_firestore() -> List[Dict[str, str]]:
     return documents
 
 
-history_tmp1 = {
-    "messages": [
-        ["human", "List me me my account details"],
-        ["ai", "I can help with that!\n\nFirst, can I confirm your email address? \n"],
-        ["human", "yes"],
-        ["ai", "What is your email address? \n"],
-    ],
-    "bag_id": 1,
-    "user_id": "emKszv8xjISy446FJNmK",
-}
-
-history_tmp2 = {
-    "messages": [
-        ["human", "Hi"],
-        ["ai", "Hello! How can I help you today? 😊 \n"],
-    ],
-    "bag_id": 1,
-    "user_id": "emKszv8xjISy446FJNmK",
-}
-
-
 @app.route("/assistant", methods=["GET"])
 def assistant():
     query = request.args.get("query")
+    thread_id = request.args.get("thread_id")
+    chat_history = FirestoreChatMessageHistory(session_id=thread_id)
 
-    history_tmp2["messages"].append(HumanMessage(content=query))
-    res = graph.invoke(history_tmp2)
+    res = graph.invoke(
+        {
+            "messages": [HumanMessage(content=query)],
+            "user_id": "emKszv8xjISy446FJNmK",
+            "bag_id": 1,
+            "query": query,
+        }
+    )
+    chat_history.add_message(HumanMessage(content=query))
+    chat_history.add_message(res["messages"][-1])
+
     print("**********")
     print(res)
     return {
         "messages": [
             {"role": (type(message).__name__), "content": message.content}
-            for message in res["messages"]
+            for message in chat_history.messages
             if message.content and type(message).__name__ != "ToolMessage"
         ]
     }

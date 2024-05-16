@@ -48,8 +48,7 @@ html_content = """
 
   <p>Let me know if you like it, and we can get it for you!</p>
 
-  <p>Love,<br>
-  [Your Name]</p>
+  <p>Love,<br></p>
 
 </body>
 </html>
@@ -90,7 +89,19 @@ def get_user_information(user_id: str = "emKszv8xjISy446FJNmK") -> Dict[str, Any
     return {"user_data": document.to_dict()}
 
 
-TOOLS = [get_user_information, send_email]
+@tool
+def get_information_about_bag(bag_name: str):
+    """
+
+    :param bag_id: the name of the bag to search
+    :return: all the information relevant for a bag
+    """
+    # document = db.collection("Bags").document(bag_id).get()
+    document = db.collection("Bags").where("name", "==", bag_name).get()[0]
+    return {"bag_data": document.to_dict()}
+
+
+TOOLS = [get_user_information, send_email, get_information_about_bag]
 
 
 def assistant_node(state: AssistantAgentState):
