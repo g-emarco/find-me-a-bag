@@ -117,7 +117,7 @@ def _populate_bag_email(bag_data):
     <html>
     <body>
        <p>{{ bag_name }}</p>
-      <img src="{{ bag_image }}" alt="Bag Image">
+      <img src="{{ image_url }}" alt="Bag Image">
       <p>{{ bag_description }}</p>
       <p>Price: {{ bag_price }}</p>
     </body>
@@ -126,7 +126,7 @@ def _populate_bag_email(bag_data):
     template = jinja2.Template(html_content3)
 
     data = {
-        "bag_image": bag_data.get("bag_image", ""),
+        "image_url": bag_data.get("image_url", ""),
         "bag_price": bag_data.get("bag_price", "Unknown"),
         "bag_description": bag_data.get("bag_description", "A beautiful bag"),
         "bag_name": bag_data.get("bag_name"),

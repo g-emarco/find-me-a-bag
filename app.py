@@ -62,16 +62,16 @@ def get_bags():
 
         print(f"***********************************")
 
-        if im_b64 and not query:
+        if im_b64:
             img_bytes = base64.b64decode(im_b64.encode("utf-8"))
             print(f"{img_bytes[:50]=}")
 
             with open("tmp_image.jpeg", "wb") as file:
                 file.write(img_bytes)
-
-            graph_res = get_bag_by_image(
-                image_file_path="tmp_image.jpeg", thread_id=thread_id
-            )
+            if not query:
+                graph_res = get_bag_by_image(
+                    image_file_path="tmp_image.jpeg", thread_id=thread_id
+                )
 
         if im_b64 and query:
             graph_res = get_bag_by_image_and_text_query(

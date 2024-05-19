@@ -2,7 +2,7 @@ import json
 import os
 import subprocess
 from enum import Enum
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import firebase_admin
 import requests
@@ -42,11 +42,12 @@ class Searches(Enum):
 def hybrid_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"].strip("'")
     thread_id = state["thread_id"]
+    image_file_path:str = state["image_file_path"]
 
     update_session_state(session_id=thread_id, state="hybrid_search")
-    print(f"hybrid_search enter, {query=}, {thread_id=}")
+    print(f"hybrid_search enter, {query=}, {thread_id=} {image_file_path=}")
 
-    return matching_engine_search(query=query, hybrid=True)
+    return matching_engine_search(query=query, hybrid=True,image_file_path=image_file_path)
 
 
 def keyword_search(state: AgentState) -> Dict[str, Any]:
@@ -57,12 +58,17 @@ def keyword_search(state: AgentState) -> Dict[str, Any]:
     return matching_engine_search(query=query)
 
 
-def matching_engine_search(query: str, hybrid: bool = False) -> Dict[str, Any]:
+def matching_engine_search(query: str, hybrid: bool = False,image_file_path:Optional[str]=None) -> Dict[str, Any]:
     print(f"matching_engine_search enter, {query=}, {hybrid=}")
 
     sparse_vector = bm25.encode_documents(query)
     embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
     dense_embedding = embeddings.embed_query(text=query)
+
+    if hybrid and image_file_path:
+            print(f"embedding {image_file_path=}")
+            dense_embedding = embeddings.embed_image(image_path=image_file_path)
+
 
     text_query_sparse_embedding_modified = (
         str(sparse_vector).replace("'", '"').replace("indices", "dimensions")
@@ -92,8 +98,8 @@ def matching_engine_search(query: str, hybrid: bool = False) -> Dict[str, Any]:
         "queries": [
             {
                 "datapoint": {
-                    "sparseEmbedding": json.loads(text_query_sparse_embedding_modified),
                     "featureVector": dense_embedding,
+                    "sparseEmbedding": json.loads(text_query_sparse_embedding_modified),
                 },
                 "neighborCount": 10,
                 "rrf": {"alpha": 0.501 if hybrid else 0},
@@ -110,6 +116,7 @@ def matching_engine_search(query: str, hybrid: bool = False) -> Dict[str, Any]:
     response = requests.post(
         url, headers={"Authorization": f"Bearer {access_token}"}, json=data
     )
+    print(f"payload to vectorshearch {data=}")
     response_content = json.loads(response.content)
     print(response.status_code)
     print(response_content)
