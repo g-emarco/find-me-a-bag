@@ -25,21 +25,23 @@ def router(state: AgentState) -> str:
     router_prompt_template = """
     You are a router, your task is make a decision between 3 possible action paths based on the human message:
 
-    "SEMANTIC_SEARCH" Take this path if the query can be answered by running a semantic / similarity search query to the vectordb.
+    "SEMANTIC_SEARCH" Take this path if the query/image can be answered by running a semantic / similarity search query to the vectordb.
                       For example: cute bag to go to the beach
-                      For example: an image file path
+                      For example: only an image_file_path (without a 'query' in the state)
                       
-    "HYBRID_SEARCH" Take this path if the query should be a result of a combined search query to the vectordb, based both on similarity and keywords.
-    For example, you have in state['image'] an encoding of an image and in state['query'] you have a query like: 'Cymbal Bag'"
+    "HYBRID_SEARCH" Take this path if the query should be a result of a combined  similarity search query to the vectordb with a keywords query.
+                    For example, you have in state['image_file_path']  an image_file_path and in state['query'] you have a query like: 'Cymbal Bag'
         
-    "KEYWORD_SEARCH" Take this path if you have only the query requires a simple keyword search, for example "a blue bag" can be translated into a keyword search.
+    "KEYWORD_SEARCH" Take this path if you have only a query that requires a simple keyword search, for example "a blue bag" can be translated into a keyword search. 
+                      Do not take this path if you have an image in the state
     
     Rule 1 : You should never infer information if it does not appear in the context of the query
     Rule 2 : You can only answer with the type of query that you choose based on why you choose it.
-
+    Rule 3: if you have image_file_path and query- it is a hybrid search
+    
     Answer only with the type of query that you choose, just one word.
     {input}
-    
+    {image_file_path}
     Instructions: {instructions}
     """
 
@@ -51,7 +53,9 @@ def router(state: AgentState) -> str:
     chain = router_prompt | llm | parser
 
     query = state["query"]
-    res = chain.invoke({"input": query})
+    image_file_path = state.get("image_file_path")
+
+    res = chain.invoke({"input": query, "image_file_path":image_file_path})
 
     match res:
         case Searches.SEMANTIC_SEARCH:
