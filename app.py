@@ -27,17 +27,25 @@ def index():
     return render_template("index.html")
 
 
-def get_bag_by_text_query(text_query: str):
-    return compiled_graph.invoke({"query": text_query})
+def get_bag_by_text_query(text_query: str, thread_id: str):
+    return compiled_graph.invoke({"query": text_query, "thread_id": thread_id})
 
 
-def get_bag_by_image(image_file_path: str):
-    return compiled_graph.invoke({"query": "", "image_file_path": image_file_path})
-
-
-def get_bag_by_image_and_text_query(text_query: str, image_file_path: str):
+def get_bag_by_image(image_file_path: str, thread_id: str):
     return compiled_graph.invoke(
-        {"query": text_query, "image_file_path": image_file_path}
+        {"query": "", "image_file_path": image_file_path, "thread_id": thread_id}
+    )
+
+
+def get_bag_by_image_and_text_query(
+    text_query: str, image_file_path: str, thread_id: str
+):
+    return compiled_graph.invoke(
+        {
+            "query": text_query,
+            "image_file_path": image_file_path,
+            "thread_id": thread_id,
+        }
     )
 
 
@@ -50,6 +58,7 @@ def get_bags():
 
         query = request.json.get("query")
         im_b64 = request.json.get("image")
+        thread_id = request.json.get("thread_id", "default-thread-id12312312")
 
         print(f"***********************************")
 
@@ -60,15 +69,17 @@ def get_bags():
             with open("tmp_image.jpeg", "wb") as file:
                 file.write(img_bytes)
 
-            graph_res = get_bag_by_image(image_file_path="tmp_image.jpeg")
+            graph_res = get_bag_by_image(
+                image_file_path="tmp_image.jpeg", thread_id=thread_id
+            )
 
         if im_b64 and query:
             graph_res = get_bag_by_image_and_text_query(
-                text_query=query, image_file_path="tmp_image.jpeg"
+                text_query=query, image_file_path="tmp_image.jpeg", thread_id=thread_id
             )
 
         if query and not im_b64:
-            graph_res = get_bag_by_text_query(text_query=query)
+            graph_res = get_bag_by_text_query(text_query=query, thread_id=thread_id)
 
         documents = (
             db.collection("Bags")
@@ -79,10 +90,12 @@ def get_bags():
 
     if request.method == "GET":
         query = request.args.get("query")
+        thread_id = request.args.get("thread_id", "default-thread-id12312312")
+
 
         if query:
             print("filtering bags...")
-            graph_res = get_bag_by_text_query(text_query=query)
+            graph_res = get_bag_by_text_query(text_query=query, thread_id=thread_id)
             documents = (
                 db.collection("Bags")
                 .where(filter=FieldFilter("id", "in", graph_res["results"]))

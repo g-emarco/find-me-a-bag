@@ -4,11 +4,14 @@ import subprocess
 from enum import Enum
 from typing import Any, Dict
 
+import firebase_admin
 import requests
+from firebase_admin import db, credentials, firestore
 from langchain_google_vertexai import VertexAIEmbeddings
 
 from agent.state import AgentState
 from corpus import bm25
+from db_setup import db
 
 VECTORDB_PROJECT_ID = "<my_project_id>"
 VECTORDB_REGION = "me-west1"
@@ -16,6 +19,18 @@ VECTORDB_BUCKET = "<my_gcs_bucket>"
 VECTORDB_BUCKET_URI = f"gs://{VECTORDB_BUCKET}"
 
 MAX_RES = 10
+
+
+def update_session_state(session_id: str, state: str) -> None:
+
+    doc_ref = db.collection("Sessions").document(session_id)
+
+    if doc_ref:
+        doc_ref.set({"state": state})
+    else:
+        db.collection("Sessions").add(
+            document_data={"state": state}, document_id=session_id
+        )
 
 
 class Searches(Enum):
@@ -26,13 +41,18 @@ class Searches(Enum):
 
 def hybrid_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"].strip("'")
-    print(f"hybrid_search enter, {query=}")
+    thread_id = state["thread_id"]
+
+    update_session_state(session_id=thread_id, state="hybrid_search")
+    print(f"hybrid_search enter, {query=}, {thread_id=}")
 
     return matching_engine_search(query=query, hybrid=True)
 
 
 def keyword_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"].strip("'")
+    thread_id = state["thread_id"]
+    update_session_state(session_id=thread_id, state="keyword_search")
 
     return matching_engine_search(query=query)
 
@@ -105,6 +125,10 @@ def matching_engine_search(query: str, hybrid: bool = False) -> Dict[str, Any]:
 
 def semantic_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"]
+    thread_id = state["thread_id"]
+
+    update_session_state(session_id=thread_id, state="semantic_search")
+
     print(f"************semantic_search enter ************")
     print(f"************{state=}******")
 

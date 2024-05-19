@@ -4,7 +4,13 @@ from langchain_core.prompts import PromptTemplate
 from langchain_google_vertexai import VertexAI
 from langgraph.graph import END, StateGraph
 
-from agent.nodes import Searches, hybrid_search, keyword_search, semantic_search
+from agent.nodes import (
+    Searches,
+    hybrid_search,
+    keyword_search,
+    semantic_search,
+    update_session_state,
+)
 from agent.state import AgentState
 
 load_dotenv()
@@ -13,6 +19,9 @@ llm = VertexAI(model_name="gemini-1.5-pro-preview-0409")
 
 
 def router(state: AgentState) -> str:
+    thread_id = state["thread_id"]
+    update_session_state(session_id=thread_id, state="router")
+
     router_prompt_template = """
     You are a router, your task is make a decision between 3 possible action paths based on the human message:
 
