@@ -55,7 +55,7 @@ def router(state: AgentState) -> str:
     query = state["query"]
     image_file_path = state.get("image_file_path")
 
-    res = chain.invoke({"input": query, "image_file_path":image_file_path})
+    res = chain.invoke({"input": query, "image_file_path": image_file_path})
 
     match res:
         case Searches.SEMANTIC_SEARCH:

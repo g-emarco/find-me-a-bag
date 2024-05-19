@@ -51,6 +51,7 @@ def get_bag_by_image_and_text_query(
 
 @app.route("/bags", methods=["POST", "GET"])
 def get_bags():
+    graph_res = {}
     if request.method == "POST":
 
         if not request.json:
@@ -92,7 +93,6 @@ def get_bags():
         query = request.args.get("query")
         thread_id = request.args.get("thread_id", "default-thread-id12312312")
 
-
         if query:
             print("filtering bags...")
             graph_res = get_bag_by_text_query(text_query=query, thread_id=thread_id)
@@ -105,12 +105,14 @@ def get_bags():
 
         else:
             print("fetching all bags...")
-
             documents = get_all_documents_from_firestore()
 
     filtered_bags = documents
-
-    return jsonify(filtered_bags)
+    response_dict = {
+        "bags": filtered_bags,
+        "action": graph_res["action"] if graph_res.get("action") else "no_search",
+    }
+    return jsonify(response_dict)
 
 
 def get_all_documents_from_firestore() -> List[Dict[str, str]]:

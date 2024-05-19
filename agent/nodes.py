@@ -42,12 +42,14 @@ class Searches(Enum):
 def hybrid_search(state: AgentState) -> Dict[str, Any]:
     query = state["query"].strip("'")
     thread_id = state["thread_id"]
-    image_file_path:str = state["image_file_path"]
+    image_file_path: str = state["image_file_path"]
 
     update_session_state(session_id=thread_id, state="hybrid_search")
     print(f"hybrid_search enter, {query=}, {thread_id=} {image_file_path=}")
 
-    return matching_engine_search(query=query, hybrid=True,image_file_path=image_file_path)
+    return matching_engine_search(
+        query=query, hybrid=True, image_file_path=image_file_path
+    )
 
 
 def keyword_search(state: AgentState) -> Dict[str, Any]:
@@ -58,7 +60,9 @@ def keyword_search(state: AgentState) -> Dict[str, Any]:
     return matching_engine_search(query=query)
 
 
-def matching_engine_search(query: str, hybrid: bool = False,image_file_path:Optional[str]=None) -> Dict[str, Any]:
+def matching_engine_search(
+    query: str, hybrid: bool = False, image_file_path: Optional[str] = None
+) -> Dict[str, Any]:
     print(f"matching_engine_search enter, {query=}, {hybrid=}")
 
     sparse_vector = bm25.encode_documents(query)
@@ -66,9 +70,8 @@ def matching_engine_search(query: str, hybrid: bool = False,image_file_path:Opti
     dense_embedding = embeddings.embed_query(text=query)
 
     if hybrid and image_file_path:
-            print(f"embedding {image_file_path=}")
-            dense_embedding = embeddings.embed_image(image_path=image_file_path)
-
+        print(f"embedding {image_file_path=}")
+        dense_embedding = embeddings.embed_image(image_path=image_file_path)
 
     text_query_sparse_embedding_modified = (
         str(sparse_vector).replace("'", '"').replace("indices", "dimensions")
@@ -102,7 +105,7 @@ def matching_engine_search(query: str, hybrid: bool = False,image_file_path:Opti
                     "sparseEmbedding": json.loads(text_query_sparse_embedding_modified),
                 },
                 "neighborCount": 10,
-                "rrf": {"alpha": 0.501 if hybrid else 0},
+                "rrf": {"alpha": 0.8 if hybrid else 0},
             }
         ],
         "returnFullDatapoint": False,
@@ -127,7 +130,10 @@ def matching_engine_search(query: str, hybrid: bool = False,image_file_path:Opti
     ]
 
     print(f"{ids=}")
-    return {"results": ids[:MAX_RES]}
+    return {
+        "results": ids[:MAX_RES],
+        "action": "hybrid_search" if hybrid else "keyword_search",
+    }
 
 
 def semantic_search(state: AgentState) -> Dict[str, Any]:
@@ -177,4 +183,4 @@ def semantic_search(state: AgentState) -> Dict[str, Any]:
         for neighbor in response.nearest_neighbors[0].neighbors.pb
     ]
     print(f"neighbors are {ids=}")
-    return {"results": ids[:MAX_RES]}
+    return {"results": ids[:MAX_RES], "action": "semantic_search"}

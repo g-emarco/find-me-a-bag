@@ -83,13 +83,12 @@ html_content3 = """
     <h2>Hi!</h2>
 
     <p>I was thinking about you and saw this beautiful bag. What do you think?</p>
-    <p>It is called {{ bag_name }}.</p>
+    <p>It is called {{ name }}.</p>
 
-    <img src="{{ bag_image }}" alt="bag" class="bag-image">
-    <p>{{ bag_description }}</p>
+    <img src="{{ image_url }}" alt="bag" class="bag-image">
+    <p>{{ description }}</p>
 
     <p>I love the rich color, and it seems like the perfect size for everyday use. It looks so stylish and classic, just like you! 😉</p>
-
     <p>Let me know if you like it, and we can get it for you!</p>
     <p class="signature">Love,<br>{{ sender_name }}</p>
   </div>
@@ -104,32 +103,21 @@ def _populate_bag_email(bag_data):
 
     Args:
         bag_data (dict): A dictionary containing bag information:
-            - 'image': URL of the bag image.
-            - 'dimensions': Dimensions of the bag.
-            - 'price': Price of the bag.
-            - 'description': A short description of the bag.
+            - 'bag_image_url': URL of the bag image.
+            - 'bag_description': A short description of the bag.
+            - 'bag_price': Price of the bag.
+            - 'bag_name' : The bag name
 
     Returns:
         str: The populated HTML email content.
     """
-    html_content = """
-    <!DOCTYPE html>
-    <html>
-    <body>
-       <p>{{ bag_name }}</p>
-      <img src="{{ image_url }}" alt="Bag Image">
-      <p>{{ bag_description }}</p>
-      <p>Price: {{ bag_price }}</p>
-    </body>
-    </html>
-    """
     template = jinja2.Template(html_content3)
 
     data = {
-        "image_url": bag_data.get("image_url", ""),
-        "bag_price": bag_data.get("bag_price", "Unknown"),
-        "bag_description": bag_data.get("bag_description", "A beautiful bag"),
-        "bag_name": bag_data.get("bag_name"),
+        "image_url": bag_data.get("bag_image_url", ""),
+        "price": bag_data.get("bag_price", "Unknown"),
+        "description": bag_data.get("bag_description", "A beautiful bag"),
+        "name": bag_data.get("bag_name"),
     }
 
     return template.render(data)
