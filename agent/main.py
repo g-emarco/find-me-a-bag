@@ -15,7 +15,7 @@ from agent.state import AgentState
 
 load_dotenv()
 
-llm = VertexAI(model_name="gemini-1.5-pro-preview-0409")
+llm = VertexAI(model_name="gemini-1.5-flash-preview-0514", location="me-west1")
 
 
 def router(state: AgentState) -> str:

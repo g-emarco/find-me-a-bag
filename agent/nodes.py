@@ -4,9 +4,8 @@ import subprocess
 from enum import Enum
 from typing import Any, Dict, Optional
 
-import firebase_admin
 import requests
-from firebase_admin import db, credentials, firestore
+from firebase_admin import db
 from langchain_google_vertexai import VertexAIEmbeddings
 
 from agent.state import AgentState
@@ -66,7 +65,8 @@ def matching_engine_search(
     print(f"matching_engine_search enter, {query=}, {hybrid=}")
 
     sparse_vector = bm25.encode_documents(query)
-    embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
+    embeddings = VertexAIEmbeddings(
+        model_name="multimodalembedding@001")
     dense_embedding = embeddings.embed_query(text=query)
 
     if hybrid and image_file_path:
@@ -145,7 +145,9 @@ def semantic_search(state: AgentState) -> Dict[str, Any]:
     print(f"************semantic_search enter ************")
     print(f"************{state=}******")
 
-    embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
+    embeddings = VertexAIEmbeddings(
+        model_name="multimodalembedding@001"
+    )
 
     if image_file_path := state.get("image_file_path"):
         print(f"embedding {image_file_path=}")

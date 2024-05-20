@@ -16,7 +16,7 @@ import os
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 
-llm = ChatVertexAI(model_name="gemini-1.5-pro-preview-0409")
+llm = ChatVertexAI(model_name="gemini-1.5-flash-preview-0514", location="me-west1")
 
 html_content = """
 <!DOCTYPE html>

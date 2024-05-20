@@ -114,7 +114,10 @@ def _populate_bag_email(bag_data):
     template = jinja2.Template(html_content3)
 
     data = {
-        "image_url": bag_data.get("bag_image_url", ""),
+        "image_url": bag_data.get(
+            "bag_image_url",
+            "https://storage.googleapis.com/984298407984_bucket-summit-tlv-24-public/bag-dataset/greenclassiccymbal1.png",
+        ),
         "price": bag_data.get("bag_price", "Unknown"),
         "description": bag_data.get("bag_description", "A beautiful bag"),
         "name": bag_data.get("bag_name"),
