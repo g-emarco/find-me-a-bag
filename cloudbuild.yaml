@@ -4,7 +4,7 @@ steps:
   id: Deploy API
   args: ['run', 'deploy', 'service-bags',
              '--source=.',
-             '--service-account=langgraph-agent-sa@langgraph-422507.iam.gserviceaccount.com',
+             '--service-account=langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com',
              '--region=me-west1',
               '--allow-unauthenticated',
               '--set-secrets=SENDGRID_API_KEY=SENDGRID_API_KEY:latest',
@@ -15,7 +15,7 @@ steps:
   id: Deploy API Vuln
   args: ['run', 'deploy', 'service-bags-vuln-research',
              '--source=.',
-             '--service-account=langgraph-agent-sa@langgraph-422507.iam.gserviceaccount.com',
+             '--service-account=langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com',
              '--region=me-west1',
               '--allow-unauthenticated',
               '--set-secrets=SENDGRID_API_KEY=SENDGRID_API_KEY:latest',

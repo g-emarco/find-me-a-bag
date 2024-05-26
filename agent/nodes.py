@@ -65,8 +65,7 @@ def matching_engine_search(
     print(f"matching_engine_search enter, {query=}, {hybrid=}")
 
     sparse_vector = bm25.encode_documents(query)
-    embeddings = VertexAIEmbeddings(
-        model_name="multimodalembedding@001")
+    embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
     dense_embedding = embeddings.embed_query(text=query)
 
     if hybrid and image_file_path:
@@ -145,9 +144,7 @@ def semantic_search(state: AgentState) -> Dict[str, Any]:
     print(f"************semantic_search enter ************")
     print(f"************{state=}******")
 
-    embeddings = VertexAIEmbeddings(
-        model_name="multimodalembedding@001"
-    )
+    embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
 
     if image_file_path := state.get("image_file_path"):
         print(f"embedding {image_file_path=}")

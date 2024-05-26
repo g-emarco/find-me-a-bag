@@ -18,39 +18,6 @@ from sendgrid.helpers.mail import Mail
 
 llm = ChatVertexAI(model_name="gemini-1.5-flash-preview-0514", location="me-west1")
 
-html_content = """
-<!DOCTYPE html>
-<html>
-<head>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <style>
-    /* Some basic styling to make the email look nice */
-    body { font-family: sans-serif; max-width: 100%; width: auto; }
-    img { max-width: 100%; height: auto; }
-    @media (min-width: 600px) { /* Adjusts the size for screens wider than 600px */
-      img { max-width: 25%; } /* Limits image width to 25% of the container on desktop */
-    }
-  </style>
-</head>
-<body>
-
-  <h2>Hi!</h2>
-
-  <p>I was thinking about you and saw this beautiful bag. What do you think?</p>
-
-  <img src="https://storage.googleapis.com/984298407984_bucket-summit-tlv-24-public/bag-dataset/greenclassic2.png" alt="Green Classic Bag">
-
-  <p>I love the rich green color, and it seems like the perfect size for everyday use. It looks so stylish and classic, just like you! 😉</p>
-
-  <p>Let me know if you like it, and we can get it for you!</p>
-
-  <p>Love,<br></p>
-
-</body>
-</html>
-
-"""
-
 
 @tool
 def send_email(bag_data: Optional[Dict[str, Any]]) -> None:
@@ -62,8 +29,8 @@ def send_email(bag_data: Optional[Dict[str, Any]]) -> None:
     print(bag_data)
     html_content2 = _populate_bag_email(bag_data=bag_data)
     message = Mail(
-        from_email="e75686682@gmail.com",
-        to_emails="emarco@google.com",
+        from_email=os.environ["FROM_EMAIL"],
+        to_emails=os.environ["TO_EMAIL"],
         subject="Cool bag to buy",
         html_content=html_content2,
     )

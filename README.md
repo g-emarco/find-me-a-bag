@@ -27,7 +27,7 @@ Router Agent, E-commerce Assistant
 
 **Server Side:** LangGraph 🦜🕸️, Flask
 
-**Vectorstore:** VertexAI  Vector Search
+**Vectorstore:** VertexAI Vector Search
 
 **Database:** Firestore
 
@@ -43,7 +43,8 @@ To run this project, you will need to add the following environment variables to
 
 `SENDGRID_API_KEY`
 `GOOGLE_APPLICATION_CREDENTIALS`
-
+`PROJECT_ID`
+`LOCAL`
 
 ## Run Locally
 
@@ -69,7 +70,7 @@ Install dependencies
 Start the Flask server
 
 ```bash
-  flask run app.py
+  flask run app.py --debug
 ```
 
 NOTE: When running locally make sure `GOOGLE_APPLICATION_CREDENTIALS` is set to a service account with permissions to use VertexAI
@@ -77,7 +78,7 @@ NOTE: When running locally make sure `GOOGLE_APPLICATION_CREDENTIALS` is set to 
 
 ## Deployment to cloud run
 
-CI/CD via Cloud build is availale in ```cloudbuild.yaml```
+CI/CD via Cloud build is available in ```cloudbuild.yaml```
 
 Please replace $PROJECT_ID with your actual Google Cloud project ID.
 
@@ -94,29 +95,29 @@ gcloud services enable vertexai.googleapis.com
 
 ```
 
-2. Create a service account `vertex-ai-consumer` with the following roles:
+2. Create a service account `langgraph-agent-sa` with the following roles:
 
 
 
 
 ```bash
 gcloud iam service-accounts create vertex-ai-consumer \
-    --display-name="Vertex AI Consumer"
+    --display-name="LangGraph Agent SA"
 
 gcloud projects add-iam-policy-binding PROJECT_ID \
-    --member="serviceAccount:vertex-ai-consumer@PROJECT_ID.iam.gserviceaccount.com" \
+    --member="serviceAccount:langgraph-agent-sa@P$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/run.invoker"
 
 gcloud projects add-iam-policy-binding PROJECT_ID \
-    --member="serviceAccount:vertex-ai-consumer@PROJECT_ID.iam.gserviceaccount.com" \
+    --member="serviceAccount:langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/serviceusage.serviceUsageConsumer"
 
 gcloud projects add-iam-policy-binding PROJECT_ID \
-    --member="serviceAccount:vertex-ai-consumer@PROJECT_ID.iam.gserviceaccount.com" \
+    --member="serviceAccount:langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/ml.admin"
 
 gcloud projects add-iam-policy-binding PROJECT_ID \
-    --member="serviceAccount:vertex-ai-consumer@PROJECT_ID.iam.gserviceaccount.com" \
+    --member="serviceAccount:langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com" \
     --role="roles/vertexai.admin"
 
 ```
@@ -124,7 +125,7 @@ gcloud projects add-iam-policy-binding PROJECT_ID \
 3. Create the secrets:
 `SENDGRID_API_KEY`
 
-and for each secret grant the SA `vertex-ai-consumer@$PROJECT_ID.iam.gserviceaccount.com` Secret Manager Secret Accessor
+and for each secret grant the SA `langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com` Secret Manager Secret Accessor
 role to th secrets
 
 4. Build Image
@@ -139,9 +140,9 @@ docker push me-west1-docker.pkg.dev/$PROJECT_ID/app/find-me-a-bag:latest
 
 6. Deploy to cloud run
 ```gcloud run deploy $PROJECT_ID \
-    --image=me-west1-docker.pkg.dev/PROJECT_ID/app/find-me-a-bag:latest \
+    --image=me-west1-docker.pkg.dev/$PROJECT_ID/app/find-me-a-bag:latest \
     --region=me-west1 \
-    --service-account=vertex-ai-consumer@$PROJECT_ID.iam.gserviceaccount.com \
+    --service-account=langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com \
     --allow-unauthenticated \
     --set-secrets="SENDGRID_API_KEY=projects/PROJECT_ID/secrets/SENDGRID_API_KEY/versions/latest"
 ```
