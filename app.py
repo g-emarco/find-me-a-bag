@@ -105,7 +105,7 @@ def get_bags():
 
         else:
             print("fetching all bags...")
-            documents = get_all_documents_from_firestore()
+            documents = get_all_documents_from_firestore2()
 
     filtered_bags = documents
     response_dict = {
@@ -122,6 +122,12 @@ def get_all_documents_from_firestore() -> List[Dict[str, str]]:
 
     return documents
 
+def get_all_documents_from_firestore2() -> List[Dict[str, str]]:
+
+    data = db.collection("Profiles").stream()
+    documents = [d.to_dict() for d in data]
+
+    return documents
 
 @app.route("/assistant", methods=["GET"])
 def assistant():

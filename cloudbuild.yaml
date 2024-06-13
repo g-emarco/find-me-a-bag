@@ -1,19 +1,19 @@
 steps:
-- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
-  entrypoint: gcloud
-  id: Deploy API
-  args: ['run', 'deploy', 'service-bags',
-             '--source=.',
-             '--service-account=langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com',
-             '--region=me-west1',
-              '--allow-unauthenticated',
-              '--set-secrets=SENDGRID_API_KEY=SENDGRID_API_KEY:latest',
-              '--min-instances=1']
+#- name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+#  entrypoint: gcloud
+#  id: Deploy API
+#  args: ['run', 'deploy', 'service-bags',
+#             '--source=.',
+#             '--service-account=langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com',
+#             '--region=me-west1',
+#              '--allow-unauthenticated',
+#              '--set-secrets=SENDGRID_API_KEY=SENDGRID_API_KEY:latest',
+#              '--min-instances=1']
 
 - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
   entrypoint: gcloud
   id: Deploy API Vuln
-  args: ['run', 'deploy', 'service-bags-vuln-research',
+  args: ['run', 'deploy', 'tg-demo',
              '--source=.',
              '--service-account=langgraph-agent-sa@$PROJECT_ID.iam.gserviceaccount.com',
              '--region=me-west1',
