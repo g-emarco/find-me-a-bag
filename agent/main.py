@@ -9,6 +9,7 @@ from agent.nodes import (
     hybrid_search,
     keyword_search,
     semantic_search,
+    semantic_search2,
     update_session_state,
 )
 from agent.state import AgentState
@@ -26,14 +27,9 @@ def router(state: AgentState) -> str:
     You are a router, your task is make a decision between 3 possible action paths based on the human message:
 
     "SEMANTIC_SEARCH" Take this path if the query/image can be answered by running a semantic / similarity search query to the vectordb.
-                      For example: cute bag to go to the beach
+                      For example: "feet", or "girl with hat", or "blond"
                       For example: only an image_file_path (without a 'query' in the state)
                       
-    "HYBRID_SEARCH" Take this path if the query should be a result of a combined  similarity search query to the vectordb with a keywords query.
-                    For example, you have in state['image_file_path']  an image_file_path and in state['query'] you have a query like: 'Cymbal Bag'
-        
-    "KEYWORD_SEARCH" Take this path if you have only a query that requires a simple keyword search, for example "a blue bag" can be translated into a keyword search. 
-                      Do not take this path if you have an image in the state
     
     Rule 1 : You should never infer information if it does not appear in the context of the query
     Rule 2 : You can only answer with the type of query that you choose based on why you choose it.
@@ -76,7 +72,7 @@ flow = StateGraph(AgentState)
 flow.add_node("classify_query", start_dummy)
 flow.set_entry_point("classify_query")
 flow.add_conditional_edges("classify_query", router)
-flow.add_node(Searches.SEMANTIC_SEARCH.value, semantic_search)  # type: ignore
+flow.add_node(Searches.SEMANTIC_SEARCH.value, semantic_search2)  # type: ignore
 flow.add_node(Searches.HYBRID_SEARCH.value, hybrid_search)  # type: ignore
 flow.add_node(Searches.KEYWORD_SEARCH.value, keyword_search)  # type: ignore
 flow.add_edge(Searches.KEYWORD_SEARCH.value, END)  # type: ignore

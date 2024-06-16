@@ -49,8 +49,73 @@ def get_bag_by_image_and_text_query(
     )
 
 
+# @app.route("/bags", methods=["POST", "GET"])
+# def get_bags():
+#     graph_res = {}
+#     if request.method == "POST":
+#
+#         if not request.json:
+#             abort(400)
+#
+#         query = request.json.get("query")
+#         im_b64 = request.json.get("image")
+#         thread_id = request.json.get("thread_id", "default-thread-id12312312")
+#
+#         print(f"***********************************")
+#
+#         if im_b64:
+#             img_bytes = base64.b64decode(im_b64.encode("utf-8"))
+#             print(f"{img_bytes[:50]=}")
+#
+#             with open("tmp_image.jpeg", "wb") as file:
+#                 file.write(img_bytes)
+#             if not query:
+#                 graph_res = get_bag_by_image(
+#                     image_file_path="tmp_image.jpeg", thread_id=thread_id
+#                 )
+#
+#         if im_b64 and query:
+#             graph_res = get_bag_by_image_and_text_query(
+#                 text_query=query, image_file_path="tmp_image.jpeg", thread_id=thread_id
+#             )
+#
+#         if query and not im_b64:
+#             graph_res = get_bag_by_text_query(text_query=query, thread_id=thread_id)
+#
+#         documents = (
+#             db.collection("Bags")
+#             .where(filter=FieldFilter("id", "in", graph_res["results"]))
+#             .get()
+#         )
+#         documents = [d.to_dict() for d in documents]
+#
+#     if request.method == "GET":
+#         query = request.args.get("query")
+#         thread_id = request.args.get("thread_id", "default-thread-id12312312")
+#
+#         if query:
+#             print("filtering bags...")
+#             graph_res = get_bag_by_text_query(text_query=query, thread_id=thread_id)
+#             documents = (
+#                 db.collection("Bags")
+#                 .where(filter=FieldFilter("id", "in", graph_res["results"]))
+#                 .get()
+#             )
+#             documents = [d.to_dict() for d in documents]
+#
+#         else:
+#             print("fetching all bags...")
+#             documents = get_all_documents_from_firestore2()
+#
+#     filtered_bags = documents
+#     response_dict = {
+#         "bags": filtered_bags,
+#         "action": graph_res["action"] if graph_res.get("action") else "no_search",
+#     }
+#     return jsonify(response_dict)
+
 @app.route("/bags", methods=["POST", "GET"])
-def get_bags():
+def get_bags2():
     graph_res = {}
     if request.method == "POST":
 
@@ -83,11 +148,13 @@ def get_bags():
             graph_res = get_bag_by_text_query(text_query=query, thread_id=thread_id)
 
         documents = (
-            db.collection("Bags")
-            .where(filter=FieldFilter("id", "in", graph_res["results"]))
+            db.collection("Profiles")
+            .where(FieldPath.document_id(), "in", graph_res["results"])
             .get()
         )
         documents = [d.to_dict() for d in documents]
+        for d in documents:
+            d.pop('embedding_field')
 
     if request.method == "GET":
         query = request.args.get("query")
@@ -97,12 +164,13 @@ def get_bags():
             print("filtering bags...")
             graph_res = get_bag_by_text_query(text_query=query, thread_id=thread_id)
             documents = (
-                db.collection("Bags")
-                .where(filter=FieldFilter("id", "in", graph_res["results"]))
+                db.collection("Profiles")
+                .where(FieldPath.document_id(), "in", graph_res["results"])
                 .get()
             )
             documents = [d.to_dict() for d in documents]
-
+            for d in documents:
+                d.pop('embedding_field')
         else:
             print("fetching all bags...")
             documents = get_all_documents_from_firestore2()
@@ -113,7 +181,6 @@ def get_bags():
         "action": graph_res["action"] if graph_res.get("action") else "no_search",
     }
     return jsonify(response_dict)
-
 
 def get_all_documents_from_firestore() -> List[Dict[str, str]]:
 

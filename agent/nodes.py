@@ -6,6 +6,10 @@ from typing import Any, Dict, Optional
 
 import requests
 from firebase_admin import db
+from google.cloud.firestore_v1 import DocumentSnapshot
+from google.cloud.firestore_v1.vector import Vector
+from google.cloud import firestore
+
 from langchain_google_vertexai import VertexAIEmbeddings
 
 from agent.state import AgentState
@@ -17,7 +21,7 @@ VECTORDB_REGION = "me-west1"
 VECTORDB_BUCKET = "<my_gcs_bucket>"
 VECTORDB_BUCKET_URI = f"gs://{VECTORDB_BUCKET}"
 
-MAX_RES = 10
+MAX_RES = 4
 
 
 def update_session_state(session_id: str, state: str) -> None:
@@ -133,6 +137,40 @@ def matching_engine_search(
         "results": ids[:MAX_RES],
         "action": "hybrid_search" if hybrid else "keyword_search",
     }
+
+def semantic_search2(state: AgentState) -> Dict[str, Any]:
+    query = state["query"]
+    thread_id = state["thread_id"]
+    update_session_state(session_id=thread_id, state="semantic_search")
+
+
+    print(f"************semantic_search enter ************")
+    print(f"************{state=}******")
+
+    embeddings = VertexAIEmbeddings(model_name="multimodalembedding@001")
+    if image_file_path := state.get("image_file_path"):
+        print(f"embedding {image_file_path=}")
+        embedding = embeddings.embed_image(image_path=image_file_path)
+    if query:
+        embedding = embeddings.embed_query(text=query)
+
+    from google.cloud.firestore_v1.base_vector_query import DistanceMeasure
+    firestore_client = firestore.Client()
+    collection = firestore_client.collection("Profiles")
+
+    res = collection.find_nearest(
+        vector_field="embedding_field",
+        query_vector=Vector(embedding),
+        distance_measure=DistanceMeasure.EUCLIDEAN,
+        limit=MAX_RES).get()
+
+    documents_ids = [document_snapshot.id for document_snapshot in res]
+    for d in documents_ids:
+        print(d)
+    documents = [document_snapshot.to_dict() for document_snapshot in res]
+    for doc in documents:
+        print(doc['name'])
+    return {"results": documents_ids, "action": "semantic_search"}
 
 
 def semantic_search(state: AgentState) -> Dict[str, Any]:
