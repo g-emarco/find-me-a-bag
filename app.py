@@ -126,6 +126,16 @@ def get_all_documents_from_firestore2() -> List[Dict[str, str]]:
 
     data = db.collection("Profiles").stream()
     documents = [d.to_dict() for d in data]
+    documents = [d for d in documents if 'country' in d]
+
+    for doc in documents:
+        if "embedding_field" in doc:
+            doc.pop("embedding_field")
+        print(doc)
+
+        doc['price'] = doc['country']
+
+
 
     return documents
 
